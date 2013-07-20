@@ -1,0 +1,104 @@
+#from anyjson import simplejson
+import logging
+from apiclient.discovery import build
+import httplib2
+import json
+import random
+from dsprotocol import *
+from google.appengine.ext import db
+from datetime import datetime
+from datetime import date
+from django.http import HttpResponse, Http404
+
+from time import time,sleep,clock
+
+from oauth2client.client import OAuth2WebServerFlow
+from oauth2client.appengine import AppAssertionCredentials
+
+
+#from oauth2client.client import SignedJwtAssertionCredentials
+# Here's the file you get from API Console -> Service Account.
+#reference page:https://developers.google.com/api-client-library/python/guide/aaa_oauth#OAuth2WebServerFlow
+def authByFile():
+    f = file('key.p12', 'rb')
+    key = f.read()
+    f.close()
+    
+    # Create an httplib2.Http object to handle our HTTP requests and authorize it
+    # with the Credentials. Note that the first parameter, service_account_name,
+    # is the Email address created for the Service account. It must be the email
+    # address associated with the key that was created.
+    credentials = SignedJwtAssertionCredentials('1051573791655-2j8fighnb53na2snh7tdp5ksf9aht1c5@developer.gserviceaccount.com',key,scope='https://www.googleapis.com/auth/fusiontables',access_type='offline')
+    #print credentials._generate_refresh_request_body()
+    return credentials
+
+
+def authByCode():
+    flow = OAuth2WebServerFlow(client_id='1051573791655-2j8fighnb53na2snh7tdp5ksf9aht1c5@developer.gserviceaccount.com',
+                               client_secret='Lzm51QOxYazHCxYsGE5h8Htr',
+                               scope='https://www.googleapis.com/auth/fusiontables',
+                               redirect_uri='http://localhost')
+    auth_uri = flow.step1_get_authorize_url()
+    
+    print "copy and paste the url below into browser address bar and hit enter"
+    print auth_uri
+    code = raw_input("Enter code (parameter of URL): ")
+    
+    credentials = flow.step2_exchange(code)
+    return credentials
+
+def authByApp():
+    return AppAssertionCredentials(scope='https://www.googleapis.com/auth/fusiontables.read')
+
+def execSQL(service, sql):
+    #for i in range(10):
+    #   start = clock()
+    #   ret=service.query().sql(sql=sql).execute()
+        #print(ret['columns'])
+        #print(ret['rows'])
+    #   print(len(ret['rows']))
+    #   end = clock()
+    #   print "time cost for retrieval: %f s"%((end - start))
+    return service.query().sql(sql=sql).execute()
+
+def fusiontableService():
+    credentials = authByApp()
+    http = httplib2.Http()
+    http = credentials.authorize(http)
+    service = build("fusiontables", "v1", http=http) 
+    return Service
+
+#genData(service)
+#sql="SELECT time,count FROM 192FBWXTEtR_e-Bkf2w1vAE610GhSvyqhj-vuuB0 WHERE eventid < 9"
+    print sql
+    queryTest(service, sql)
+# For example, let make SQL query to SELECT ALL from Table with
+# id = 1gvB3SedL89vG5r1128nUN5ICyyw7Wio5g1w1mbk
+#print(service.table().list().execute())
+
+
+class Book(db.Model):
+    title = db.StringProperty(required=True)
+    author = db.StringProperty(required=True)
+    copyright_year = db.IntegerProperty() 
+   
+
+def fakeRes():
+    obj = Book(title="dive into python", author="haha", copyright_year=2013)
+    print json.dumps(db.to_dict(obj))
+
+#TODO define the query interface
+def ftproxy(request):
+    argsMap = parseReqArgs(request)
+    data={'cols': [{'id': 'A', 'label': 'NEW A', 'type': 'string'},
+       {'id': 'B', 'label': 'B-label', 'type': 'number'}],
+'rows': [{'c': [{'v': 'a'}, {'v': 1.0, 'f': 'One'}]},
+         {'c':[{'v': 'b'}, {'v': 2.0, 'f': 'Two'}]},
+         {'c':[{'v': 'c'}, {'v': 3.0, 'f': 'Three'}]}
+        ]}
+    ret= buildResp(reqId=argsMap[TQX_FIELD][TQX_REQID_FIELD], table=data)
+    return HttpResponse(json.dumps(ret))
+
+if __name__ == '__main__':
+    #frproxy()
+    fakeRes()

@@ -1,0 +1,34 @@
+<html>
+
+<body>
+<div>
+<form name="input" action="processAdminCmd" method="get">
+table id: <input type='text'name='tID'>
+<br>
+client_id: <input type='text'name='client_id'>
+<br>
+secret: <input type='text'name='secret'>
+<br>
+redirect_uri: <input type='text'name='redirect_uri'>
+<br>
+<input type="submit" name='cmd' value="insertTableMeta">
+</form>
+</div>
+
+<table>
+<th>
+<td>table id</td><td>client id</td><td>secret</td><td>redirect_uri</td><td>authed</td>
+</th>
+{% for tableMeta in tableMetas %}
+<tr>
+<td>{{ tableMeta.tID }}</td>
+<td>{{ tableMeta.client_id }}</td>
+<td>{{ tableMeta.secret }}</td>
+<td>{{ tableMeta.redirect_uri }}</td>
+<td>{{ forloop.Counter }}</td>
+</tr>
+{% endfor %}
+</table>
+</body>
+
+</html>
