@@ -23,6 +23,7 @@ def delLogicTableMeta(lTableName, fTableID):
         .filter('fTableID=',fTableID).get()
     rec.delete()
 
+###########################
 class Credentials(db.Model):
     client_id=db.StringProperty(required=True)
     credential = CredentialsProperty(required=True)

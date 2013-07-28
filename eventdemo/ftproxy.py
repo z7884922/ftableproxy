@@ -43,7 +43,6 @@ def ftproxy(request):
     #             {'c':[{'v': 'b'}, {'v': 2.0, 'f': 'Two'}]},
     #            {'c':[{'v': 'c'}, {'v': 3.0, 'f': 'Three'}]}
     #           ]}
-    
     ret= buildResp(reqId=argsMap[TQX_FIELD][TQX_REQID_FIELD], table=data)
     return HttpResponse(json.dumps(ret))
 
